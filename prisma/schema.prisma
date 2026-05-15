@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Registration {
+  id            String           @id @default(cuid())
+  firstName     String
+  lastName      String
+  phone         String
+  email         String           @unique
+  bankAccount   String
+  emailVerified Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  sessions      Session[]
+  requests      PaymentRequest[]
+  contacts      Contact[]
+}
+
+model PaymentRequest {
+  id               String       @id @default(cuid())
+  userId           String
+  user             Registration @relation(fields: [userId], references: [id])
+  scenario         String       @default("loan")
+  groupId          String?
+  recipientName    String
+  recipientEmail   String?
+  recipientPhone   String?
+  amount           Float
+  itemDescription  String?
+  dueDate          DateTime
+  description      String
+  reminderType     String       @default("weekly")
+  reminderDays     Int          @default(7)
+  status           String       @default("active")
+  attachments      String       @default("[]")
+  notificationSent Boolean      @default(false)
+  confirmToken     String?      @unique
+  confirmedAt      DateTime?
+  paidAt           DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+model Contact {
+  id        String       @id @default(cuid())
+  userId    String
+  user      Registration @relation(fields: [userId], references: [id])
+  name      String
+  email     String?
+  phone     String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model AuthCode {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Session {
+  id             String       @id @default(cuid())
+  token          String       @unique
+  registrationId String
+  registration   Registration @relation(fields: [registrationId], references: [id])
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  topic     String
+  message   String
+  createdAt DateTime @default(now())
+}

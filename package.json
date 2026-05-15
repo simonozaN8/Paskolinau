@@ -1,0 +1,41 @@
+{
+  "name": "paskolinau-ui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "db:push": "prisma db push && prisma generate",
+    "postinstall": "prisma generate",
+    "mobile": "npm --prefix mobile run start",
+    "mobile:clear": "npm --prefix mobile run start:clear",
+    "expo": "npm --prefix mobile run start",
+    "expo:clear": "npm --prefix mobile run start:clear"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.3",
+    "@prisma/adapter-libsql": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "dotenv": "^16.5.0",
+    "lucide-react": "^1.14.0",
+    "next": "16.2.6",
+    "nodemailer": "^8.0.7",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "twilio": "^6.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/nodemailer": "^8.0.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "prisma": "^7.8.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

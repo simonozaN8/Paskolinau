@@ -1,0 +1,20 @@
+export type DashRequest = {
+  id: string;
+  scenario: string;
+  groupId: string | null;
+  recipientName: string;
+  recipientEmail: string | null;
+  recipientPhone: string | null;
+  amount: number;
+  itemDescription: string | null;
+  description: string;
+  dueDate: string;
+  status: string;
+  reminderType: string;
+  reminderDays: number;
+  confirmedAt: string | null;
+  paidAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt?: string;
+};

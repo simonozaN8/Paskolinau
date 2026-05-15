@@ -1,0 +1,25 @@
+{
+  "name": "Paskolinau.lt",
+  "short_name": "Paskolinau",
+  "description": "Sukurk. Išsiųsk. Sistema pasirūpins.",
+  "start_url": "/pradzia",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#1B2A4A",
+  "icons": [
+    {
+      "src": "/Paskolinau_varpelis_logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Paskolinau_varpelis_logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

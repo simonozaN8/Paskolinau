@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Paskolinau.lt",
+    "slug": "paskolinau",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "paskolinau",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1B2A4A"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "lt.paskolinau.app",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true
+        }
+      }
+    },
+    "android": {
+      "usesCleartextTraffic": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1B2A4A"
+      },
+      "package": "lt.paskolinau.app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Leidžiame nufotografuoti čekį sąskaitos padalijimui.",
+          "photosPermission": "Leidžiame pasirinkti čekio nuotrauką iš galerijos."
+        }
+      ],
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Leidžiame pasirinkti gavėją iš telefono kontaktų."
+        }
+      ]
+    ]
+  }
+}
