@@ -62,6 +62,7 @@ function buildMessages(payload: NotifyPayload) {
 
   const confirmUrl = `${getConfirmBaseUrl()}/confirm/${confirmToken}`;
   const siteUrl = getSiteUrl();
+  const logoUrl = `${siteUrl}/paskolinau_logo.png`;
   const dueStr = dueDate.toLocaleDateString("lt-LT", {
     year: "numeric",
     month: "long",
@@ -75,23 +76,25 @@ function buildMessages(payload: NotifyPayload) {
   const safeAmount = escapeHtml(amountText);
 
   const subject = isReminder
-    ? `${senderName} primena apie mokėjimą – Paskolinau.lt`
-    : `${senderName} siunčia mokėjimo prašymą – Paskolinau.lt`;
+    ? "Paskolinau.lt – priminimas apie įsipareigojimą"
+    : "Paskolinau.lt – prašome patvirtinti skolą";
 
-  const headline = isReminder ? "Priminimas apie mokėjimą" : "Naujas mokėjimo prašymas";
+  const headline = isReminder
+    ? "Sistemos priminimas"
+    : "Prašymas patvirtinti skolą";
 
   const isItem = !!itemDescription?.trim();
 
   const lead = isReminder
-    ? `${senderName} primena, kad terminas artėja arba įsipareigojimas dar neįvykdytas.`
-    : `${senderName} per Paskolinau.lt siunčia Jums prašymą patvirtinti skolą ir įsipareigojimą.`;
+    ? `Sistema Paskolinau.lt primena apie artėjantį terminą arba neįvykdytą įsipareigojimą. Prašymą užregistravo ${senderName} – mes pasirūpiname priminimais už Jūs, kad nereikėtų asmeniškai derėtis ar priminti.`
+    : `Sistema Paskolinau.lt informuoja: ${senderName} užregistravo su Jumis susijusį įsipareigojimą. Mes pasirūpinsime priminimais ir fiksavimu – kad nereikėtų atlikti to nemalonaus darbo asmeniškai.`;
 
   const actionHint = isItem
     ? "Atidarykite nuorodą ir pasirinkite: „Patvirtinu“ (pripažįstu skolą) arba „Grąžinta“ (daiktas jau grąžintas)."
     : "Atidarykite nuorodą ir pasirinkite: „Patvirtinu“ (pripažįstu skolą) arba „Grąžinta“ (suma jau grąžinta).";
 
   const purpose = isReminder
-    ? `Šis priminimas susijęs su <strong>${escapeHtml(reason)}</strong> ir prašymu: „${safeDesc}“.`
+    ? `Priminimas susijęs su <strong>${escapeHtml(reason)}</strong> ir prašymu: „${safeDesc}“.`
     : `Prašymas susijęs su <strong>${escapeHtml(reason)}</strong>: „${safeDesc}“.`;
 
   const text =
@@ -101,12 +104,12 @@ function buildMessages(payload: NotifyPayload) {
     `${isReminder ? "Primename dėl" : "Prašymas dėl"}: ${description}\n` +
     `Suma: ${amountText}\n` +
     `Mokėjimo terminas: ${dueStr}\n` +
-    `Nuo: ${senderName}\n\n` +
+    `Prašymą užregistravo: ${senderName}\n\n` +
     `${actionHint}\n\n` +
     `${confirmUrl}\n\n` +
     `Oficiali svetainė: ${siteUrl}\n\n` +
     `— Paskolinau.lt\n` +
-    `Šis laiškas išsiųstas automatiškai. Jei negavote tokio prašymo, ignoruokite žinutę.`;
+    `Šį laišką išsiuntė sistema Paskolinau.lt, ne asmuo tiesiogiai. Jei negavote tokio prašymo, ignoruokite žinutę.`;
 
   const html = `<!DOCTYPE html>
 <html lang="lt">
@@ -116,9 +119,17 @@ function buildMessages(payload: NotifyPayload) {
     <tr><td align="center">
       <table width="100%" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e2e8f0;">
         <tr>
-          <td style="background:#1A2B4A;padding:24px 28px;">
-            <p style="margin:0;font-size:20px;font-weight:700;color:#ffffff;">Paskolinau<span style="color:#00C853;">.lt</span></p>
-            <p style="margin:8px 0 0;font-size:13px;color:#94a3b8;">${headline}</p>
+          <td style="padding:28px 28px 20px;background:#ffffff;text-align:center;border-bottom:3px solid #00C853;">
+            <a href="${siteUrl}" style="text-decoration:none;">
+              <img src="${logoUrl}" alt="Paskolinau.lt" width="200" style="display:block;margin:0 auto;max-width:200px;height:auto;border:0;" />
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#1A2B4A;padding:16px 28px;">
+            <p style="margin:0;font-size:13px;font-weight:600;color:#00C853;text-transform:uppercase;letter-spacing:0.06em;">Paskolinau.lt</p>
+            <p style="margin:6px 0 0;font-size:15px;font-weight:600;color:#ffffff;">${escapeHtml(headline)}</p>
+            <p style="margin:8px 0 0;font-size:12px;line-height:1.5;color:#94a3b8;">Automatinis sistemos pranešimas</p>
           </td>
         </tr>
         <tr>
@@ -129,7 +140,7 @@ function buildMessages(payload: NotifyPayload) {
             <p style="margin:0 0 20px;font-size:13px;line-height:1.6;color:#64748b;">${escapeHtml(actionHint)}</p>
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:24px;">
               <tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;">
-                <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;">Kas siunčia</p>
+                <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;">Prašymą užregistravo</p>
                 <p style="margin:4px 0 0;font-size:15px;font-weight:600;color:#1A2B4A;">${safeSender}</p>
               </td></tr>
               <tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;">
@@ -160,7 +171,8 @@ function buildMessages(payload: NotifyPayload) {
         <tr>
           <td style="padding:16px 28px;background:#f8fafc;border-top:1px solid #e2e8f0;">
             <p style="margin:0;font-size:11px;line-height:1.5;color:#94a3b8;text-align:center;">
-              Šis pranešimas išsiųstas automatiškai per Paskolinau.lt. Jei negavote tokio prašymo, galite ignoruoti šį laišką.
+              Šį pranešimą išsiuntė sistema <strong>Paskolinau.lt</strong>, ne ${safeSender} tiesiogiai.
+              Sistema primena ir fiksuoja įsipareigojimus už Jus. Jei negavote tokio prašymo, galite ignoruoti šį laišką.
             </p>
           </td>
         </tr>
@@ -171,8 +183,8 @@ function buildMessages(payload: NotifyPayload) {
 </html>`;
 
   const smsText = isReminder
-    ? `Paskolinau.lt | ${senderName} primena: „${description}“. ${amountText}, terminas ${dueStr}. Patvirtinkite skolą: ${confirmUrl}`
-    : `Paskolinau.lt | ${senderName} prašo patvirtinti skolą: „${description}“. ${amountText}, terminas ${dueStr}. Patvirtinu/Grąžinta: ${confirmUrl}`;
+    ? `Paskolinau.lt primena (užregistravo ${senderName}): „${description}“. ${amountText}, terminas ${dueStr}. Patvirtinkite: ${confirmUrl}`
+    : `Paskolinau.lt: ${senderName} užregistravo skolą – patvirtinkite. „${description}“. ${amountText}, terminas ${dueStr}. ${confirmUrl}`;
 
   return { subject, text, html, smsText, confirmUrl };
 }
