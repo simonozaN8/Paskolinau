@@ -19,10 +19,6 @@ export const metadata: Metadata = {
   title: "Paskolinau.lt – Sukurk. Išsiųsk. Sistema pasirūpins.",
   description:
     "Paprasta ir patikima sistema mokėjimo prašymams, priminimams ir skolų valdymui.",
-  icons: {
-    icon: [{ url: "/Paskolinau_varpelis_logo.png", type: "image/png" }],
-    apple: "/Paskolinau_varpelis_logo.png",
-  },
 };
 
 export default async function RootLayout({
