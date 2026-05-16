@@ -6,10 +6,22 @@ import Link from "next/link";
 
 export const metadata = { title: "Sukurti prašymą – Paskolinau.lt" };
 
-export default async function NewRequestPage() {
+export default async function NewRequestPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>;
+}) {
   const user = await getSessionUser();
+  const { from: fromRaw } = await searchParams;
 
-  if (!user) redirect("/");
+  if (!user) {
+    const returnPath =
+      fromRaw && fromRaw.startsWith("/") && !fromRaw.startsWith("//")
+        ? decodeURIComponent(fromRaw)
+        : "/";
+    const sep = returnPath.includes("?") ? "&" : "?";
+    redirect(`${returnPath}${sep}register=1`);
+  }
 
   if (!user.emailVerified) {
     return (

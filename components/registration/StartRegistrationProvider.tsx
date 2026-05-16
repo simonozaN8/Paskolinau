@@ -10,6 +10,7 @@ import {
 } from "react";
 import { ArrowRight, X } from "lucide-react";
 import { EmailVerifyModal } from "@/components/auth/EmailVerifyModal";
+import { RegisterFromUrl } from "@/components/registration/RegisterFromUrl";
 
 type FormState = {
   firstName: string;
@@ -61,6 +62,7 @@ export function StartRegistrationProvider({ children }: { children: React.ReactN
 
   return (
     <StartRegistrationContext.Provider value={value}>
+      <RegisterFromUrl />
       {children}
       {isOpen && (
         <StartRegistrationModal

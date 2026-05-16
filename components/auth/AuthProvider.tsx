@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -27,7 +28,8 @@ type AuthCtx = {
   closeLogin: () => void;
   loginOpen: boolean;
   logout: () => Promise<void>;
-  refresh: () => Promise<void>;
+  /** Grąžina dabartinį naudotoją (arba null po atnaujinimo). */
+  refresh: () => Promise<AuthUser | null>;
 };
 
 const AuthContext = createContext<AuthCtx | null>(null);
@@ -51,17 +53,24 @@ export function AuthProvider({
   const [loginOpen, setLoginOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const userRef = useRef(user);
+  userRef.current = user;
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (): Promise<AuthUser | null> => {
     try {
       const res = await fetch("/api/auth/me", { cache: "no-store", credentials: "include" });
       if (res.ok) {
-        setUser(await res.json() as AuthUser);
-      } else {
-        setUser(null);
+        const next = (await res.json()) as AuthUser;
+        setUser(next);
+        return next;
       }
+      if (res.status === 401) {
+        setUser(null);
+        return null;
+      }
+      return userRef.current;
     } catch {
-      setUser(null);
+      return userRef.current;
     }
   }, []);
 
