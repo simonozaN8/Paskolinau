@@ -16,7 +16,16 @@ export async function POST(request: Request) {
 
   const trimmedEmail = email.trim().toLowerCase();
 
-  const user = await prisma.registration.findFirst({ where: { email: trimmedEmail } });
+  let user;
+  try {
+    user = await prisma.registration.findFirst({ where: { email: trimmedEmail } });
+  } catch (e) {
+    console.error("[send-code] DB klaida:", e);
+    return NextResponse.json(
+      { error: "Duomenų bazės klaida. Patikrinkite DATABASE_URL ir LIBSQL_AUTH_TOKEN." },
+      { status: 503 },
+    );
+  }
   if (!user) {
     return NextResponse.json({ error: "Tokio el. pašto neradome sistemoje" }, { status: 404 });
   }
