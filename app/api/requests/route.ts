@@ -131,6 +131,7 @@ export async function POST(request: Request) {
           recipientEmail: pr.recipientEmail,
           recipientPhone: pr.recipientPhone,
           senderName,
+          senderBankAccount: user.bankAccount,
           amount: pr.amount,
           itemDescription: pr.itemDescription,
           description: pr.description,

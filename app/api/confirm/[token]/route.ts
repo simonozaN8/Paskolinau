@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { buildPaymentDetails } from "@/lib/payment-details";
 
 type Params = { params: Promise<{ token: string }> };
 
@@ -9,16 +10,30 @@ export async function GET(_: Request, { params }: Params) {
 
   const pr = await prisma.paymentRequest.findUnique({
     where: { confirmToken: token },
-    include: { user: { select: { firstName: true, lastName: true, email: true } } },
+    include: {
+      user: { select: { firstName: true, lastName: true, email: true, bankAccount: true } },
+    },
   });
 
   if (!pr) return NextResponse.json({ error: "Prašymas nerastas" }, { status: 404 });
+
+  const senderName = `${pr.user.firstName} ${pr.user.lastName}`;
+  const payment =
+    pr.amount > 0 && !pr.itemDescription?.trim() && pr.user.bankAccount?.trim()
+      ? buildPaymentDetails({
+          beneficiaryName: senderName,
+          bankAccount: pr.user.bankAccount,
+          amount: pr.amount,
+          description: pr.description,
+          requestId: pr.id,
+        })
+      : null;
 
   return NextResponse.json({
     id: pr.id,
     status: pr.status,
     scenario: pr.scenario,
-    senderName: `${pr.user.firstName} ${pr.user.lastName}`,
+    senderName,
     recipientName: pr.recipientName,
     amount: pr.amount,
     itemDescription: pr.itemDescription,
@@ -28,6 +43,7 @@ export async function GET(_: Request, { params }: Params) {
     paidAt: pr.paidAt?.toISOString() ?? null,
     completedAt: pr.completedAt?.toISOString() ?? null,
     createdAt: pr.createdAt.toISOString(),
+    payment,
   });
 }
 

@@ -16,6 +16,8 @@ import {
   Timer,
   Users,
 } from "lucide-react";
+import { PaymentQrCard } from "@/components/requests/PaymentQrCard";
+import type { PaymentDetails } from "@/lib/payment-details";
 import type { Scenario } from "@/lib/request-types";
 import { SCENARIO_META } from "@/lib/request-types";
 import type { ComponentType } from "react";
@@ -34,6 +36,7 @@ type RequestDetails = {
   paidAt: string | null;
   completedAt: string | null;
   createdAt: string;
+  payment: PaymentDetails | null;
 };
 
 const ICONS: Record<Scenario, ComponentType<{ className?: string }>> = {
@@ -209,6 +212,12 @@ export default function ConfirmPage() {
             {data.description}
           </div>
         </div>
+
+        {data.payment && !isItem && (
+          <div className="border-b border-slate-100 px-6 py-5">
+            <PaymentQrCard payment={data.payment} />
+          </div>
+        )}
 
         {!isClosed && !done && (
           <div className="border-t border-slate-100 px-6 py-5">

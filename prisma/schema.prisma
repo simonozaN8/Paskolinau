@@ -36,6 +36,8 @@ model PaymentRequest {
   description      String
   reminderType     String       @default("weekly")
   reminderDays     Int          @default(7)
+  nextReminderAt   DateTime?
+  lastRemindedAt   DateTime?
   status           String       @default("active")
   attachments      String       @default("[]")
   notificationSent Boolean      @default(false)

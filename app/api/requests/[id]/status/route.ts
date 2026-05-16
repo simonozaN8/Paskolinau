@@ -6,7 +6,7 @@ import type { Scenario } from "@/lib/request-types";
 
 type Params = { params: Promise<{ id: string }> };
 
-const VALID_ACTIONS = ["complete", "cancel", "remind"] as const;
+const VALID_ACTIONS = ["complete", "cancel", "remind", "schedule_remind"] as const;
 type Action = typeof VALID_ACTIONS[number];
 
 export async function PATCH(request: Request, { params }: Params) {
@@ -25,6 +25,22 @@ export async function PATCH(request: Request, { params }: Params) {
   const action = (body as Record<string, unknown>).action as Action;
   if (!VALID_ACTIONS.includes(action)) {
     return NextResponse.json({ error: "Neteisinga action reikšmė" }, { status: 400 });
+  }
+
+  if (action === "schedule_remind") {
+    const scheduledAtRaw = (body as Record<string, unknown>).scheduledAt;
+    if (typeof scheduledAtRaw !== "string" || !scheduledAtRaw) {
+      return NextResponse.json({ error: "Nurodykite scheduledAt (ISO data)" }, { status: 400 });
+    }
+    const scheduledAt = new Date(scheduledAtRaw);
+    if (isNaN(scheduledAt.getTime()) || scheduledAt <= new Date()) {
+      return NextResponse.json({ error: "Priminimo laikas turi būti ateityje" }, { status: 400 });
+    }
+    const updated = await prisma.paymentRequest.update({
+      where: { id },
+      data: { nextReminderAt: scheduledAt },
+    });
+    return NextResponse.json({ ok: true, action: "schedule_remind", request: updated });
   }
 
   if (action === "remind") {
@@ -47,6 +63,7 @@ export async function PATCH(request: Request, { params }: Params) {
         recipientEmail: pr.recipientEmail,
         recipientPhone: pr.recipientPhone,
         senderName,
+        senderBankAccount: sender?.bankAccount,
         amount: pr.amount,
         itemDescription: pr.itemDescription,
         description: pr.description,
@@ -63,7 +80,7 @@ export async function PATCH(request: Request, { params }: Params) {
 
     const updated = await prisma.paymentRequest.update({
       where: { id },
-      data: { status: "reminded" },
+      data: { status: "reminded", lastRemindedAt: new Date(), nextReminderAt: null },
     });
     return NextResponse.json({
       ok: true,

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { CreateRequestButton } from "@/components/ui/CreateRequestButton";
+import { RequestDetailModal } from "@/components/dashboard/RequestDetailModal";
 import {
   GroupRequestCard,
   SingleRequestCard,
@@ -66,6 +67,7 @@ export default function DashboardPage() {
   const [requests,   setRequests]   = useState<DashRequest[]>([]);
   const [reqLoading, setReqLoading] = useState(true);
   const [refresh,    setRefresh]    = useState(0);
+  const [detailId,   setDetailId]   = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/");
@@ -82,6 +84,13 @@ export default function DashboardPage() {
       .finally(() => setReqLoading(false));
   }, [user, refresh]);
   /* eslint-enable react-hooks/set-state-in-effect */
+
+  useEffect(() => {
+    if (!user) return;
+    void fetch("/api/reminders/process", { method: "POST" }).then(() =>
+      setRefresh((n) => n + 1),
+    );
+  }, [user]);
 
   const onRefresh = () => setRefresh((n) => n + 1);
 
@@ -166,6 +175,12 @@ export default function DashboardPage() {
               <BookUser className="h-4 w-4" />
               Mano kontaktai
             </Link>
+            <Link
+              href="/dashboard/kelione"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#00C853]/30 bg-[#00C853]/5 px-4 py-2.5 text-sm font-semibold text-[#007a32] transition hover:bg-[#00C853]/10"
+            >
+              Kelionės atsiskaitymas (beta)
+            </Link>
           </div>
         </div>
 
@@ -206,12 +221,14 @@ export default function DashboardPage() {
                       key={group[0].groupId!}
                       requests={group}
                       onRefresh={onRefresh}
+                      onOpenRequest={setDetailId}
                     />
                   ) : (
                     <ul key={group[0].id} className="divide-y divide-slate-100">
                       <SingleRequestCard
                         request={group[0]}
                         onRefresh={onRefresh}
+                        onOpen={() => setDetailId(group[0].id)}
                       />
                     </ul>
                   )
@@ -222,6 +239,12 @@ export default function DashboardPage() {
         </div>
 
       </div>
+
+      <RequestDetailModal
+        requestId={detailId}
+        onClose={() => setDetailId(null)}
+        onRefresh={onRefresh}
+      />
     </div>
   );
 }

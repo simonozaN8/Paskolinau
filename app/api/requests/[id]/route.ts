@@ -55,6 +55,18 @@ export async function PATCH(request: Request, { params }: Params) {
     const d = new Date(b.dueDate);
     if (!isNaN(d.getTime())) data.dueDate = d;
   }
+  if (typeof b.reminderType === "string" && b.reminderType.trim()) {
+    data.reminderType = b.reminderType.trim();
+  }
+  if (typeof b.reminderDays === "number" && b.reminderDays >= 0) {
+    data.reminderDays = b.reminderDays;
+  }
+  if (b.nextReminderAt === null) {
+    data.nextReminderAt = null;
+  } else if (typeof b.nextReminderAt === "string" && b.nextReminderAt) {
+    const d = new Date(b.nextReminderAt);
+    if (!isNaN(d.getTime())) data.nextReminderAt = d;
+  }
 
   const email = (data.recipientEmail as string | null) ?? pr.recipientEmail;
   const phone = (data.recipientPhone as string | null) ?? pr.recipientPhone;

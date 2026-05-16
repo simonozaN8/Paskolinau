@@ -61,9 +61,10 @@ function fmt(iso: string)  { return new Date(iso).toLocaleDateString("lt-LT", { 
 type Props = {
   requests: DashRequest[];
   onRefresh: () => void;
+  onOpenRequest?: (id: string) => void;
 };
 
-export function GroupRequestCard({ requests, onRefresh }: Props) {
+export function GroupRequestCard({ requests, onRefresh, onOpenRequest }: Props) {
   const [open, setOpen]       = useState(false);
   const [acting, setActing]   = useState<string | null>(null);
   const [qrForId, setQrForId] = useState<string | null>(null);
@@ -176,7 +177,11 @@ export function GroupRequestCard({ requests, onRefresh }: Props) {
                   const isActing = acting?.startsWith(r.id);
 
                   return (
-                    <tr key={r.id} className="hover:bg-slate-50/50">
+                    <tr
+                      key={r.id}
+                      className="cursor-pointer hover:bg-slate-50/50"
+                      onClick={() => onOpenRequest?.(r.id)}
+                    >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           {isPaid(r.status) && (
@@ -208,7 +213,10 @@ export function GroupRequestCard({ requests, onRefresh }: Props) {
                             <button
                               type="button"
                               title="QR patvirtinimas"
-                              onClick={() => setQrForId(qrForId === r.id ? null : r.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setQrForId(qrForId === r.id ? null : r.id);
+                              }}
                               className={`inline-flex items-center rounded-lg border px-2 py-1 transition ${
                                 qrForId === r.id
                                   ? "border-[#00C853] bg-[#00C853]/10 text-[#007a32]"
@@ -222,7 +230,10 @@ export function GroupRequestCard({ requests, onRefresh }: Props) {
                             <button
                               type="button"
                               disabled={!!isActing}
-                              onClick={() => patchStatus(r.id, "complete")}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void patchStatus(r.id, "complete");
+                              }}
                               className="rounded-lg bg-[#00C853]/10 px-2.5 py-1 text-[10px] font-semibold text-[#007a32] transition hover:bg-[#00C853]/20 disabled:opacity-50"
                             >
                               {acting === r.id + "complete" ? "…" : "Patvirtinti ✓"}
@@ -232,7 +243,10 @@ export function GroupRequestCard({ requests, onRefresh }: Props) {
                             <button
                               type="button"
                               disabled={!!isActing}
-                              onClick={() => patchStatus(r.id, "remind")}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                void patchStatus(r.id, "remind");
+                              }}
                               className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1 text-[10px] font-semibold text-slate-600 transition hover:bg-slate-100 disabled:opacity-50"
                             >
                               <Bell className="h-3 w-3" />
@@ -274,9 +288,10 @@ export function GroupRequestCard({ requests, onRefresh }: Props) {
 type SingleProps = {
   request: DashRequest;
   onRefresh: () => void;
+  onOpen?: () => void;
 };
 
-export function SingleRequestCard({ request: r, onRefresh }: SingleProps) {
+export function SingleRequestCard({ request: r, onRefresh, onOpen }: SingleProps) {
   const [acting, setActing] = useState(false);
   const [showQr, setShowQr] = useState(false);
   const st = STATUS_CFG[r.status] ?? STATUS_CFG.active;
@@ -300,7 +315,13 @@ export function SingleRequestCard({ request: r, onRefresh }: SingleProps) {
 
   return (
     <li className="py-3">
-      <div className="flex items-center justify-between gap-3">
+      <div
+        className="flex cursor-pointer items-center justify-between gap-3 rounded-lg transition hover:bg-slate-50/80"
+        onClick={onOpen}
+        onKeyDown={(e) => e.key === "Enter" && onOpen?.()}
+        role="button"
+        tabIndex={0}
+      >
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-navy">{r.recipientName}</p>
         <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
@@ -312,7 +333,7 @@ export function SingleRequestCard({ request: r, onRefresh }: SingleProps) {
             <button
               type="button"
               disabled={acting}
-              onClick={() => patchStatus("remind")}
+              onClick={(e) => { e.stopPropagation(); void patchStatus("remind"); }}
               className="inline-flex items-center gap-0.5 text-slate-400 transition hover:text-navy disabled:opacity-40"
             >
               <Bell className="h-3 w-3" />
@@ -339,7 +360,7 @@ export function SingleRequestCard({ request: r, onRefresh }: SingleProps) {
         {canShowQr && (
           <button
             type="button"
-            onClick={() => setShowQr((v) => !v)}
+            onClick={(e) => { e.stopPropagation(); setShowQr((v) => !v); }}
             title="QR patvirtinimas"
             className={`rounded-lg border px-2 py-0.5 text-[10px] font-semibold transition ${
               showQr
@@ -354,7 +375,7 @@ export function SingleRequestCard({ request: r, onRefresh }: SingleProps) {
           <button
             type="button"
             disabled={acting}
-            onClick={() => patchStatus("complete")}
+            onClick={(e) => { e.stopPropagation(); void patchStatus("complete"); }}
             className="rounded-lg bg-[#00C853]/10 px-2 py-0.5 text-[10px] font-semibold text-[#007a32] hover:bg-[#00C853]/20"
           >
             {acting ? "…" : "✓"}

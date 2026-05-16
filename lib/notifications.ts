@@ -1,5 +1,11 @@
 import type { Scenario } from "@/lib/request-types";
 import { sendEmail } from "@/lib/email";
+import {
+  buildPaymentDetails,
+  formatIbanDisplay,
+  formatPaymentText,
+  type PaymentDetails,
+} from "@/lib/payment-details";
 import { sendSms } from "@/lib/sms";
 import { getConfirmBaseUrl, getSiteUrl } from "@/lib/urls";
 
@@ -31,6 +37,8 @@ export type NotifyPayload = {
   confirmToken: string;
   scenario: Scenario;
   isReminder?: boolean;
+  /** Skolintojo banko sąskaita (IBAN) – rodoma gavėjui mokėjimui. */
+  senderBankAccount?: string;
 };
 
 export type NotifyResult = {
@@ -58,9 +66,34 @@ function buildMessages(payload: NotifyPayload) {
     confirmToken,
     scenario,
     isReminder,
+    requestId,
+    senderBankAccount,
   } = payload;
 
   const confirmUrl = `${getConfirmBaseUrl()}/confirm/${confirmToken}`;
+  let payment: PaymentDetails | null = null;
+  if (senderBankAccount?.trim() && amount > 0 && !itemDescription?.trim()) {
+    payment = buildPaymentDetails({
+      beneficiaryName: senderName,
+      bankAccount: senderBankAccount,
+      amount,
+      description,
+      requestId,
+    });
+  }
+  const paymentText = payment ? formatPaymentText(payment) : "";
+  const paymentHtml = payment
+    ? `<table width="100%" cellpadding="0" cellspacing="0" style="background:#ecfdf5;border-radius:12px;border:1px solid #a7f3d0;margin-bottom:24px;">
+              <tr><td style="padding:16px 20px;">
+                <p style="margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#047857;">Mokėjimo rekvizitai</p>
+                <p style="margin:0 0 4px;font-size:13px;color:#1A2B4A;"><strong>Gavėjas:</strong> ${escapeHtml(payment.beneficiaryName)}</p>
+                <p style="margin:0 0 4px;font-size:13px;color:#1A2B4A;"><strong>IBAN:</strong> ${escapeHtml(formatIbanDisplay(payment.iban))}</p>
+                <p style="margin:0 0 4px;font-size:13px;color:#1A2B4A;"><strong>Suma:</strong> ${payment.amount.toFixed(2)} €</p>
+                <p style="margin:0;font-size:13px;color:#1A2B4A;"><strong>Paskirtis:</strong> ${escapeHtml(payment.reference)}</p>
+                <p style="margin:12px 0 0;font-size:12px;line-height:1.5;color:#047857;">Patvirtinimo puslapyje rasite ir QR kodą banko programėlei – rekvizitai bus užpildyti automatiškai.</p>
+              </td></tr>
+            </table>`
+    : "";
   const siteUrl = getSiteUrl();
   const logoUrl = `${siteUrl}/Paskolinau_varpelis_logo.png`;
   const dueStr = dueDate.toLocaleDateString("lt-LT", {
@@ -105,6 +138,7 @@ function buildMessages(payload: NotifyPayload) {
     `Suma: ${amountText}\n` +
     `Mokėjimo terminas: ${dueStr}\n` +
     `Prašymą užregistravo: ${senderName}\n\n` +
+    (paymentText ? `${paymentText}\n\n` : "") +
     `${actionHint}\n\n` +
     `${confirmUrl}\n\n` +
     `Oficiali svetainė: ${siteUrl}\n\n` +
@@ -138,6 +172,7 @@ function buildMessages(payload: NotifyPayload) {
             <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#475569;">${escapeHtml(lead)}</p>
             <p style="margin:0 0 12px;font-size:14px;line-height:1.6;color:#475569;">${purpose}</p>
             <p style="margin:0 0 20px;font-size:13px;line-height:1.6;color:#64748b;">${escapeHtml(actionHint)}</p>
+            ${paymentHtml}
             <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:24px;">
               <tr><td style="padding:16px 20px;border-bottom:1px solid #e2e8f0;">
                 <p style="margin:0;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#94a3b8;">Prašymą užregistravo</p>
@@ -182,9 +217,12 @@ function buildMessages(payload: NotifyPayload) {
 </body>
 </html>`;
 
+  const smsPayment = payment
+    ? ` IBAN ${formatIbanDisplay(payment.iban)}, ${payment.amount.toFixed(2)}€, paskirtis ${payment.reference}.`
+    : "";
   const smsText = isReminder
-    ? `Paskolinau.lt primena (užregistravo ${senderName}): „${description}“. ${amountText}, terminas ${dueStr}. Patvirtinkite: ${confirmUrl}`
-    : `Paskolinau.lt: ${senderName} užregistravo skolą – patvirtinkite. „${description}“. ${amountText}, terminas ${dueStr}. ${confirmUrl}`;
+    ? `Paskolinau.lt primena (užregistravo ${senderName}): „${description}“. ${amountText}, terminas ${dueStr}.${smsPayment} Patvirtinkite: ${confirmUrl}`
+    : `Paskolinau.lt: ${senderName} užregistravo skolą – patvirtinkite. „${description}“. ${amountText}, terminas ${dueStr}.${smsPayment} ${confirmUrl}`;
 
   return { subject, text, html, smsText, confirmUrl };
 }
