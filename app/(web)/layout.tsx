@@ -1,13 +1,6 @@
 import type { ReactNode } from "react";
-import { SiteHeader } from "@/components/layout/SiteHeader";
-import { SiteFooter } from "@/components/layout/SiteFooter";
+import { WebChrome } from "@/components/layout/WebChrome";
 
 export default function WebLayout({ children }: { children: ReactNode }) {
-  return (
-    <>
-      <SiteHeader />
-      <main className="flex-1">{children}</main>
-      <SiteFooter />
-    </>
-  );
+  return <WebChrome>{children}</WebChrome>;
 }

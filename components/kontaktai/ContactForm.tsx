@@ -146,7 +146,11 @@ export function ContactForm() {
             className="mt-1 h-4 w-4 rounded border-slate-300 text-[#00C853] focus:ring-[#00C853]"
           />
           <span>
-            Sutinku, kad mano duomenys būtų naudojami atsakymui pateikti.
+            Sutinku su{" "}
+            <a href="/privatumo-politika" className="text-[#00C853] hover:underline">
+              privatumo politika
+            </a>{" "}
+            ir kad mano duomenys būtų naudojami atsakymui pateikti.
           </span>
         </label>
         {error && (

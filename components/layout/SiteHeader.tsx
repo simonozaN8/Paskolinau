@@ -11,7 +11,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { LoginModal } from "@/components/auth/LoginModal";
 import { BrandLogo } from "@/components/layout/BrandLogo";
 
-export function SiteHeader() {
+export function SiteHeader({ minimal = false }: { minimal?: boolean }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const { openModal } = useStartRegistration();
@@ -28,7 +28,7 @@ export function SiteHeader() {
           <BrandLogo variant="header" onClick={closeMenu} />
 
           {/* Navigacija */}
-          <nav className="hidden items-center gap-8 lg:flex">
+          {!minimal && <nav className="hidden items-center gap-8 lg:flex">
             {NAV_ITEMS.map((item) => {
               const active = item.isActive(pathname, "");
               return (
@@ -47,7 +47,7 @@ export function SiteHeader() {
                 </Link>
               );
             })}
-          </nav>
+          </nav>}
 
           {/* Veiksmai */}
           <div className="flex items-center gap-2">
@@ -104,20 +104,22 @@ export function SiteHeader() {
                 </div>
               )
             )}
-            <button
-              type="button"
-              className="inline-flex rounded-lg border border-slate-200 p-2 text-navy lg:hidden"
-              aria-expanded={menuOpen}
-              aria-label="Meniu"
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+            {!minimal && (
+              <button
+                type="button"
+                className="inline-flex rounded-lg border border-slate-200 p-2 text-navy lg:hidden"
+                aria-expanded={menuOpen}
+                aria-label="Meniu"
+                onClick={() => setMenuOpen((v) => !v)}
+              >
+                {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            )}
           </div>
         </div>
 
         {/* Mobilusis meniu */}
-        {menuOpen && (
+        {menuOpen && !minimal && (
           <div className="border-t border-slate-100 bg-white px-4 py-4 lg:hidden">
             <nav className="flex flex-col gap-3">
               {NAV_ITEMS.map((item) => (

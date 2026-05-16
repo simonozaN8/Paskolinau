@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import { IconFacebook, IconInstagram, IconLinkedin } from "@/components/layout/SocialIcons";
 import { BrandLogo } from "@/components/layout/BrandLogo";
+import { SITE_CONTACT } from "@/lib/site-contact";
 
 const linkCol = (title: string, links: { label: string; href: string }[]) => (
   <div>
@@ -52,7 +53,7 @@ export function SiteFooter() {
                 <IconInstagram className="h-4 w-4" />
               </a>
               <a
-                href="mailto:labas@paskolinau.lt"
+                href={`mailto:${SITE_CONTACT.email}`}
                 className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 text-slate-300 transition hover:border-white hover:text-white"
                 aria-label="El. paštas"
               >
@@ -69,28 +70,34 @@ export function SiteFooter() {
           ])}
           {linkCol("Pagalba", [
             { label: "DUK", href: "/duk" },
-            { label: "Vadovai", href: "/kontaktai" },
-            { label: "Privatumo politika", href: "/kontaktai" },
-            { label: "Naudojimosi sąlygos", href: "/kontaktai" },
+            { label: "Komanda", href: "/komanda" },
+            { label: "Privatumo politika", href: "/privatumo-politika" },
+            { label: "Naudojimosi taisyklės", href: "/naudojimosi-taisykles" },
           ])}
           {linkCol("Įmonė", [
-            { label: "Apie mus", href: "/kontaktai" },
+            { label: "Apie mus", href: "/komanda" },
             { label: "Kontaktai", href: "/kontaktai" },
-            { label: "Karjera", href: "/kontaktai" },
           ])}
           <div>
             <p className="mb-4 text-sm font-semibold text-white">Susisiekite</p>
             <a
-              href="mailto:labas@paskolinau.lt"
-              className="text-sm font-medium text-[#00C853] hover:underline"
+              href={`mailto:${SITE_CONTACT.email}`}
+              className="block text-sm font-medium text-[#00C853] hover:underline"
             >
-              labas@paskolinau.lt
+              {SITE_CONTACT.email}
+            </a>
+            <a
+              href={SITE_CONTACT.phoneHref}
+              className="mt-2 flex items-center gap-1.5 text-sm text-slate-300 hover:text-white"
+            >
+              <Phone className="h-3.5 w-3.5" />
+              {SITE_CONTACT.phoneDisplay}
             </a>
             <p className="mt-3 text-sm text-slate-400">Atsakome per 1 darbo dieną.</p>
           </div>
         </div>
         <div className="mt-12 border-t border-white/10 pt-8 text-center text-xs text-slate-500">
-          © 2024 Paskolinau.lt. Visos teisės saugomos.
+          © {new Date().getFullYear()} Paskolinau.lt. Visos teisės saugomos.
         </div>
       </div>
     </footer>

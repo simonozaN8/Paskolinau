@@ -1,12 +1,5 @@
-import {
-  Bell,
-  Home,
-  Mail,
-  MapPin,
-  Phone,
-  RefreshCw,
-  Shield,
-} from "lucide-react";
+import { Bell, Mail, MapPin, Phone, RefreshCw, Shield } from "lucide-react";
+import { SITE_CONTACT } from "@/lib/site-contact";
 import Image from "next/image";
 import { ContactForm } from "@/components/kontaktai/ContactForm";
 import { DukBlock } from "@/components/kontaktai/DukBlock";
@@ -16,16 +9,7 @@ export function KontaktaiPage() {
   return (
     <>
       <section className="border-b border-slate-100 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <nav className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-            <Home className="h-3.5 w-3.5" />
-            <span>/</span>
-            <span>DUK</span>
-            <span>/</span>
-            <span className="text-navy">Kontaktai</span>
-          </nav>
-        </div>
-        <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 sm:pt-12 lg:px-8">
           <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-8">
             <div className="flex justify-center lg:col-span-3 lg:justify-start">
               <Image
@@ -78,10 +62,10 @@ export function KontaktaiPage() {
                 </span>
                 <div>
                   <a
-                    href="mailto:labas@paskolinau.lt"
+                    href={`mailto:${SITE_CONTACT.email}`}
                     className="font-semibold text-sky-700 hover:underline"
                   >
-                    labas@paskolinau.lt
+                    {SITE_CONTACT.email}
                   </a>
                   <p className="text-sm text-slate-500">El. paštas</p>
                 </div>
@@ -91,7 +75,12 @@ export function KontaktaiPage() {
                   <Phone className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="font-semibold text-sky-700">+370 612 34 567</p>
+                  <a
+                    href={SITE_CONTACT.phoneHref}
+                    className="font-semibold text-sky-700 hover:underline"
+                  >
+                    {SITE_CONTACT.phoneDisplay}
+                  </a>
                   <p className="text-sm text-slate-500">Darbo dienomis 9:00 – 18:00</p>
                 </div>
               </li>

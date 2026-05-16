@@ -62,7 +62,7 @@ function buildMessages(payload: NotifyPayload) {
 
   const confirmUrl = `${getConfirmBaseUrl()}/confirm/${confirmToken}`;
   const siteUrl = getSiteUrl();
-  const logoUrl = `${siteUrl}/paskolinau_logo.png`;
+  const logoUrl = `${siteUrl}/Paskolinau_varpelis_logo.png`;
   const dueStr = dueDate.toLocaleDateString("lt-LT", {
     year: "numeric",
     month: "long",
