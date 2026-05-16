@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sharesFromTokens } from "@/lib/confirm-url";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
 import path from "path";
@@ -169,9 +170,10 @@ export async function POST(request: Request) {
   );
 
   return NextResponse.json({
-    ids:    created.map((pr) => pr.id),
+    ids: created.map((pr) => pr.id),
+    shares: sharesFromTokens(created),
     groupId,
-    count:  created.length,
+    count: created.length,
     totalAmount: created.reduce((s, pr) => s + pr.amount, 0),
   });
 }

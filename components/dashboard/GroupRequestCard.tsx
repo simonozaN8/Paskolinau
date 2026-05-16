@@ -9,10 +9,12 @@ import {
   Euro,
   Handshake,
   Package,
+  QrCode,
   Receipt,
   Timer,
   Users,
 } from "lucide-react";
+import { ConfirmQrCard } from "@/components/requests/ConfirmQrCard";
 import type { Scenario } from "@/lib/request-types";
 import { SCENARIO_META } from "@/lib/request-types";
 import type { ComponentType } from "react";
@@ -28,6 +30,7 @@ export type DashRequest = {
   description: string;
   dueDate: string;
   status: string;
+  confirmToken: string | null;
   confirmedAt: string | null;
   paidAt: string | null;
   completedAt: string | null;
@@ -63,6 +66,7 @@ type Props = {
 export function GroupRequestCard({ requests, onRefresh }: Props) {
   const [open, setOpen]       = useState(false);
   const [acting, setActing]   = useState<string | null>(null);
+  const [qrForId, setQrForId] = useState<string | null>(null);
 
   const first   = requests[0];
   const scenario = first.scenario as Scenario;
@@ -200,6 +204,20 @@ export function GroupRequestCard({ requests, onRefresh }: Props) {
                       </td>
                       <td className="px-3 py-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          {r.confirmToken && !isPaid(r.status) && r.status !== "cancelled" && (
+                            <button
+                              type="button"
+                              title="QR patvirtinimas"
+                              onClick={() => setQrForId(qrForId === r.id ? null : r.id)}
+                              className={`inline-flex items-center rounded-lg border px-2 py-1 transition ${
+                                qrForId === r.id
+                                  ? "border-[#00C853] bg-[#00C853]/10 text-[#007a32]"
+                                  : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                              }`}
+                            >
+                              <QrCode className="h-3 w-3" />
+                            </button>
+                          )}
                           {r.status === "paid" && (
                             <button
                               type="button"
@@ -232,6 +250,19 @@ export function GroupRequestCard({ requests, onRefresh }: Props) {
               </tbody>
             </table>
           </div>
+          {qrForId && (() => {
+            const picked = requests.find((x) => x.id === qrForId);
+            if (!picked?.confirmToken) return null;
+            return (
+              <div className="border-t border-slate-100 p-4">
+                <ConfirmQrCard
+                  confirmToken={picked.confirmToken}
+                  recipientName={picked.recipientName}
+                  compact
+                />
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
@@ -247,8 +278,13 @@ type SingleProps = {
 
 export function SingleRequestCard({ request: r, onRefresh }: SingleProps) {
   const [acting, setActing] = useState(false);
+  const [showQr, setShowQr] = useState(false);
   const st = STATUS_CFG[r.status] ?? STATUS_CFG.active;
   const due = fmt(r.dueDate);
+  const canShowQr =
+    !!r.confirmToken &&
+    !isPaid(r.status) &&
+    r.status !== "cancelled";
 
   async function patchStatus(action: "complete" | "cancel" | "remind") {
     setActing(true);
@@ -263,7 +299,8 @@ export function SingleRequestCard({ request: r, onRefresh }: SingleProps) {
   }
 
   return (
-    <li className="flex items-center justify-between gap-3 py-3">
+    <li className="py-3">
+      <div className="flex items-center justify-between gap-3">
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-navy">{r.recipientName}</p>
         <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
@@ -299,6 +336,20 @@ export function SingleRequestCard({ request: r, onRefresh }: SingleProps) {
         <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${st.cls}`}>
           {st.label}
         </span>
+        {canShowQr && (
+          <button
+            type="button"
+            onClick={() => setShowQr((v) => !v)}
+            title="QR patvirtinimas"
+            className={`rounded-lg border px-2 py-0.5 text-[10px] font-semibold transition ${
+              showQr
+                ? "border-[#00C853] bg-[#00C853]/10 text-[#007a32]"
+                : "border-slate-200 text-slate-600 hover:bg-slate-100"
+            }`}
+          >
+            <QrCode className="h-3.5 w-3.5" />
+          </button>
+        )}
         {r.status === "paid" && (
           <button
             type="button"
@@ -310,6 +361,15 @@ export function SingleRequestCard({ request: r, onRefresh }: SingleProps) {
           </button>
         )}
       </div>
+      </div>
+      {showQr && r.confirmToken && (
+        <ConfirmQrCard
+          confirmToken={r.confirmToken}
+          recipientName={r.recipientName}
+          compact
+          className="mt-3"
+        />
+      )}
     </li>
   );
 }

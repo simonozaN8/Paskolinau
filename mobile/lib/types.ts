@@ -10,6 +10,7 @@ export type DashRequest = {
   description: string;
   dueDate: string;
   status: string;
+  confirmToken: string | null;
   reminderType: string;
   reminderDays: number;
   confirmedAt: string | null;

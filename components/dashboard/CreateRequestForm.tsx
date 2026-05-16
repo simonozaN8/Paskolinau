@@ -19,6 +19,8 @@ import {
   Users,
   X,
 } from "lucide-react";
+import type { RequestShare } from "@/lib/confirm-url";
+import { ConfirmQrCard } from "@/components/requests/ConfirmQrCard";
 import type {
   Attachment,
   LoanType,
@@ -68,8 +70,8 @@ const isGroup = (s: Scenario) => s !== "loan";
 /* ─────────────── Success screen ─────────────── */
 
 function SuccessScreen({
-  ids, count, totalAmount, onNew,
-}: { ids: string[]; count: number; totalAmount: number; onNew: () => void }) {
+  shares, count, totalAmount, onNew,
+}: { shares: RequestShare[]; count: number; totalAmount: number; onNew: () => void }) {
   const router = useRouter();
   return (
     <div className="flex flex-col items-center gap-6 py-10 text-center">
@@ -79,16 +81,22 @@ function SuccessScreen({
           {count > 1 ? `${count} prašymai sukurti!` : "Prašymas sukurtas!"}
         </h2>
         <p className="mt-2 text-slate-600">
-          Pranešimai išsiųsti gavėjams. Bendra suma:{" "}
+          Parodykite QR kodą skolininkui arba jie gavo nuorodą el. paštu / SMS. Bendra suma:{" "}
           <span className="font-semibold text-navy">{totalAmount.toFixed(2)} €</span>.
         </p>
       </div>
-      <div className="w-full max-w-sm space-y-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left">
-        <p className="text-xs text-slate-500">Prašymo {ids.length > 1 ? "ID sąrašas" : "ID"}</p>
-        {ids.map((id) => (
-          <p key={id} className="font-mono text-sm font-semibold text-navy">{id}</p>
-        ))}
-      </div>
+      {shares.length > 0 && (
+        <div className="w-full max-w-md space-y-3 text-left">
+          {shares.map((s) => (
+            <ConfirmQrCard
+              key={s.id}
+              confirmToken={s.confirmToken}
+              recipientName={s.recipientName}
+              compact={shares.length > 1}
+            />
+          ))}
+        </div>
+      )}
       <div className="flex flex-wrap justify-center gap-3">
         <button
           type="button"
@@ -128,7 +136,11 @@ export function CreateRequestForm() {
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<{ ids: string[]; count: number; totalAmount: number } | null>(null);
+  const [success, setSuccess] = useState<{
+    shares: RequestShare[];
+    count: number;
+    totalAmount: number;
+  } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   /* ── derived ── */
@@ -213,10 +225,17 @@ export function CreateRequestForm() {
         }),
       });
       const data = await res.json() as {
-        ids?: string[]; count?: number; totalAmount?: number; error?: string;
+        shares?: RequestShare[];
+        count?: number;
+        totalAmount?: number;
+        error?: string;
       };
       if (!res.ok) { setError(data.error ?? "Įvyko klaida."); return; }
-      setSuccess({ ids: data.ids!, count: data.count!, totalAmount: data.totalAmount! });
+      setSuccess({
+        shares: data.shares ?? [],
+        count: data.count!,
+        totalAmount: data.totalAmount!,
+      });
     } catch {
       setError("Nepavyko prisijungti prie serverio.");
     } finally {

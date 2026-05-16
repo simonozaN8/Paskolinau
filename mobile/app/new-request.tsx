@@ -29,7 +29,9 @@ import {
 import { MobileAppBar } from "../components/MobileAppBar";
 import { ContactPicker } from "../components/ContactPicker";
 import { SplitSettlementCard } from "../components/SplitSettlementCard";
+import { ConfirmQrCard } from "../components/ConfirmQrCard";
 import { createRequest } from "../lib/api";
+import type { RequestShare } from "../lib/confirm-url";
 import { useAuth } from "../lib/AuthContext";
 import {
   formatEur,
@@ -78,7 +80,11 @@ export default function NewRequestScreen() {
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<{ ids: string[]; count: number; totalAmount: number } | null>(null);
+  const [success, setSuccess] = useState<{
+    shares: RequestShare[];
+    count: number;
+    totalAmount: number;
+  } | null>(null);
 
   const multi = isGroupScenario(scenario);
   const meta = SCENARIO_META[scenario];
@@ -197,22 +203,30 @@ export default function NewRequestScreen() {
     return (
       <View style={s.screen}>
         <MobileAppBar variant="back" title="Sukurta" />
-        <View style={s.success}>
-          <CheckCircle2 size={72} color={colors.green} strokeWidth={1.25} />
+        <ScrollView contentContainerStyle={s.successScroll}>
+          <CheckCircle2 size={72} color={colors.green} strokeWidth={1.25} style={{ alignSelf: "center" }} />
           <Text style={s.successTitle}>
             {success.count > 1 ? `${success.count} prašymai sukurti!` : "Prašymas sukurtas!"}
           </Text>
           <Text style={s.successSub}>
-            Gavėjai gavo pranešimą su nuoroda „Apmokėjau“. Priminti galėsite kiekviename prašyme.
+            Parodykite QR kodą skolininkui — tai jo mini parašas. Taip pat išsiuntėme nuorodą el. paštu / SMS.
             {"\n"}Bendra suma: {formatEur(success.totalAmount)}
           </Text>
+          {success.shares.map((share) => (
+            <ConfirmQrCard
+              key={share.id}
+              confirmToken={share.confirmToken}
+              recipientName={share.recipientName}
+              compact={success.shares.length > 1}
+            />
+          ))}
           <TouchableOpacity style={s.primaryBtn} onPress={() => router.replace("/(tabs)")}>
             <Text style={s.primaryBtnText}>Į pradžią</Text>
           </TouchableOpacity>
           <TouchableOpacity style={s.secondaryBtn} onPress={() => router.replace({ pathname: "/new-request", params: { scenario } })}>
             <Text style={s.secondaryBtnText}>Sukurti kitą</Text>
           </TouchableOpacity>
-        </View>
+        </ScrollView>
       </View>
     );
   }
@@ -637,6 +651,7 @@ const s = StyleSheet.create({
     paddingVertical: 16,
   },
   submitText: { color: "#fff", fontSize: 15, fontWeight: "600" },
+  successScroll: { padding: 24, paddingBottom: 40 },
   success: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24 },
   successTitle: { fontSize: 22, fontWeight: "700", color: colors.navy, marginTop: 16, textAlign: "center" },
   successSub: { fontSize: 14, color: colors.slate600, marginTop: 8, textAlign: "center", lineHeight: 22 },

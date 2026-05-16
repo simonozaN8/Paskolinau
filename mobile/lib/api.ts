@@ -1,4 +1,5 @@
 import * as SecureStore from "expo-secure-store";
+import type { RequestShare } from "./confirm-url";
 
 // Change this to your computer's local IP when testing on a physical device
 // e.g. "http://192.168.1.100:3000"
@@ -154,7 +155,7 @@ export type CreateRequestPayload = {
 };
 
 export async function createRequest(payload: CreateRequestPayload) {
-  return apiFetch<{ ids: string[]; count: number; totalAmount: number }>("/api/requests", {
+  return apiFetch<{ ids: string[]; shares: RequestShare[]; count: number; totalAmount: number }>("/api/requests", {
     method: "POST",
     body: JSON.stringify(payload),
   });

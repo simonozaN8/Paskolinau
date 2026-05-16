@@ -23,6 +23,7 @@ import {
   Trash2,
   User,
 } from "lucide-react-native";
+import { ConfirmQrCard } from "../../components/ConfirmQrCard";
 import { MobileAppBar } from "../../components/MobileAppBar";
 import { StatusBadge } from "../../components/StatusBadge";
 import { deleteRequest, getRequest, patchRequestStatus } from "../../lib/api";
@@ -208,6 +209,14 @@ export default function RequestDetailScreen() {
             </View>
           ))}
         </View>
+
+        {req.confirmToken &&
+          !["completed", "cancelled"].includes(req.status) && (
+          <ConfirmQrCard
+            confirmToken={req.confirmToken}
+            recipientName={req.recipientName}
+          />
+        )}
 
         <View style={s.actions}>
           {canRemind && (

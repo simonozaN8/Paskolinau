@@ -129,8 +129,8 @@ export default function ConfirmPage() {
 
   const returnLabel = isItem ? "Grąžinta" : "Grąžinta / sumokėta";
   const confirmHelp = isItem
-    ? "Patvirtinu, kad pasiėmiau daiktą ir pripažįstu įsipareigojimą jį grąžinti."
-    : "Patvirtinu, kad pripažįstu skolą ir įsipareigoju grąžinti pinigus.";
+    ? "Patvirtinu, kad pasiėmiau daiktą ir pripažįstu įsipareigojimą jį grąžinti (kaip mini parašas po QR nuskaitymo)."
+    : "Patvirtinu, kad pripažįstu skolą ir įsipareigoju grąžinti pinigus (kaip mini parašas po QR nuskaitymo).";
   const returnHelp = isItem
     ? "Daiktas jau grąžintas skolintojui (skolintojas patvirtins gavimą)."
     : "Suma jau pervesta arba grąžinta (skolintojas patvirtins gavimą).";

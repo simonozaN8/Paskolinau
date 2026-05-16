@@ -10,19 +10,27 @@ import {
   CreditCard,
   Eye,
   Hash,
-  Link2,
   Loader2,
-  QrCode,
   ShoppingCart,
 } from "lucide-react";
 import { MobileAppBar } from "@/components/mobile/MobileAppBar";
+import { ConfirmQrCard } from "@/components/requests/ConfirmQrCard";
 import { cn } from "@/lib/utils";
 
 type Req = {
-  id: string; recipientName: string; amount: number; description: string;
-  itemDescription: string | null; dueDate: string | null; status: string;
-  scenario: string; createdAt: string; confirmedAt: string | null;
-  paidAt: string | null; completedAt: string | null;
+  id: string;
+  recipientName: string;
+  amount: number;
+  description: string;
+  itemDescription: string | null;
+  dueDate: string | null;
+  status: string;
+  scenario: string;
+  createdAt: string;
+  confirmToken: string | null;
+  confirmedAt: string | null;
+  paidAt: string | null;
+  completedAt: string | null;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -49,7 +57,6 @@ export default function PrasymasPage() {
   const [req, setReq] = useState<Req | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetch("/api/requests")
@@ -81,11 +88,7 @@ export default function PrasymasPage() {
     setActionLoading(false);
   }
 
-  const shareUrl = typeof window !== "undefined" ? `${window.location.origin}/confirm/${id}` : "";
-
-  function copyLink() {
-    navigator.clipboard.writeText(shareUrl).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
-  }
+  const confirmToken = req?.confirmToken ?? null;
 
   if (loading) return (
     <div className="flex min-h-screen items-center justify-center">
@@ -105,7 +108,7 @@ export default function PrasymasPage() {
   const steps: Step[] = [
     { label: "Sukurta",    sub: "Prašymas sukurtas",              date: fmtDt(req.createdAt),   status: "done"    },
     { label: "Išsiųsta",   sub: `Prašymas išsiųstas ${req.recipientName}`, date: fmtDt(req.createdAt), status: "done" },
-    { label: "Peržiūrėta", sub: `${req.recipientName} peržiūrėjo prašymą`, date: req.confirmedAt ? fmtDt(req.confirmedAt) : null, status: req.confirmedAt ? "eye" : "pending", badge: req.confirmedAt ? undefined : "Laukia" },
+    { label: "Patvirtinta", sub: req.confirmedAt ? `${req.recipientName} patvirtino (QR ar nuoroda)` : "Laukia skolininko patvirtinimo", date: req.confirmedAt ? fmtDt(req.confirmedAt) : null, status: req.confirmedAt ? "eye" : "pending", badge: req.confirmedAt ? undefined : "Laukia" },
     { label: "Apmokėjau",  sub: "Laukiama mokėjimo",               date: req.paidAt ? fmtDt(req.paidAt) : null, status: req.paidAt ? "done" : "waiting", badge: req.paidAt ? undefined : "Laukia patvirtinimo" },
     { label: "Gavau",      sub: "Patvirtinkite, kai gausite mokėjimą", date: req.completedAt ? fmtDt(req.completedAt) : null, status: req.completedAt ? "done" : "pending", badge: req.completedAt ? undefined : "Laukia" },
   ];
@@ -211,24 +214,14 @@ export default function PrasymasPage() {
         </button>
       </div>
 
-      {/* QR / link */}
-      <div className="mx-4 mt-3 mb-4 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-slate-50">
-          <QrCode className="h-8 w-8 text-navy" />
-        </span>
-        <div className="flex-1">
-          <p className="text-sm font-semibold text-navy">Mokėjimo nuoroda</p>
-          <p className="mt-0.5 text-xs text-slate-500">Pasidalinkite nuoroda arba QR kodu, kad gavėjas galėtų greitai atlikti mokėjimą.</p>
-          <button
-            type="button"
-            onClick={copyLink}
-            className="mt-1.5 flex items-center gap-1 text-xs font-semibold text-[#00C853]"
-          >
-            <Link2 className="h-3.5 w-3.5" />
-            {copied ? "Nukopijuota!" : "Kopijuoti nuorodą"}
-          </button>
+      {confirmToken && !["completed", "cancelled"].includes(req.status) && (
+        <div className="mx-4 mt-3 mb-4">
+          <ConfirmQrCard
+            confirmToken={confirmToken}
+            recipientName={req.recipientName}
+          />
         </div>
-      </div>
+      )}
     </div>
   );
 }
